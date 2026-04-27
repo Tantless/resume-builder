@@ -1,0 +1,85 @@
+profile_version: 1
+language: zh-CN
+target:
+  role: 后端开发工程师
+  city: 杭州
+  seniority: new_grad
+  direction:
+    - Python
+    - 云原生
+layout:
+  emphasis: auto
+  max_pages: 1
+basics:
+  name: 林晨
+  title: 后端开发工程师
+  phone: "13800000001"
+  email: linchen@example.com
+  location: 杭州
+  github: https://github.com/linchen
+summary:
+  - 计算机科学与技术本科，具备 Python 后端、数据库和容器化项目实践。
+  - 熟悉 FastAPI、PostgreSQL、Redis，关注接口性能和可维护性。
+education:
+  - school: 浙江示例大学
+    degree: 本科
+    major: 计算机科学与技术
+    location: 杭州
+    start: "2021.09"
+    end: "2025.06"
+    gpa: "3.7/4.0"
+    honors:
+      - 校级一等奖学金
+      - ACM 校赛二等奖
+    courses:
+      - 数据结构
+      - 操作系统
+      - 数据库系统
+projects:
+  - name: 校园二手交易平台
+    role: 后端负责人
+    start: "2024.03"
+    end: "2024.06"
+    tech:
+      - FastAPI
+      - PostgreSQL
+      - Redis
+      - Docker
+    link: https://github.com/linchen/campus-market
+    description: 面向校内学生的商品发布、检索和交易沟通平台。
+    highlights:
+      - 设计商品、订单和消息模块的数据模型，支持 1.8 万条商品数据的检索和状态流转。
+      - 为商品列表接口增加 Redis 缓存和分页索引，将 P95 响应时间从 520ms 降至 170ms。
+      - 使用 Docker Compose 管理本地开发环境，降低新成员环境搭建时间。
+  - name: 简历关键词分析工具
+    role: 核心开发
+    start: "2023.11"
+    end: "2024.01"
+    tech:
+      - Python
+      - jieba
+      - scikit-learn
+    description: 从岗位描述和简历文本中提取技能关键词并生成匹配建议。
+    highlights:
+      - 构建 3000+ 条技术岗位关键词词典，支持后端、前端、算法方向的关键词统计。
+      - 使用 TF-IDF 计算岗位与简历相似度，帮助用户发现缺失技能关键词。
+skills:
+  - category: 编程语言
+    items:
+      - Python
+      - TypeScript
+      - SQL
+  - category: 后端与数据库
+    items:
+      - FastAPI
+      - PostgreSQL
+      - Redis
+      - RESTful API
+  - category: 工程工具
+    items:
+      - Docker
+      - Git
+      - Linux
+achievements:
+  - 蓝桥杯省赛二等奖
+  - CET-6

@@ -1,0 +1,95 @@
+profile_version: 1
+language: zh-CN
+target:
+  role: 高级后端开发工程师
+  city: 深圳
+  seniority: experienced
+  direction:
+    - 高并发系统
+    - 平台工程
+layout:
+  emphasis: auto
+  max_pages: 1
+basics:
+  name: 陈嘉明
+  title: 高级后端开发工程师
+  phone: "13800000003"
+  email: chenjiaming@example.com
+  location: 深圳
+  github: https://github.com/cjm-backend
+summary:
+  - 5 年后端开发经验，长期负责交易、结算和内部平台系统建设。
+  - 熟悉 Go、Java、MySQL、Redis、Kafka，关注高并发、可观测性和工程效率。
+experience:
+  - company: 南方示例科技有限公司
+    role: 后端开发工程师
+    location: 深圳
+    start: "2021.07"
+    end: "至今"
+    type: fulltime
+    tech:
+      - Go
+      - MySQL
+      - Redis
+      - Kafka
+      - Kubernetes
+    highlights:
+      - 主导订单结算链路重构，将同步结算拆分为事件驱动流程，支撑日均 180 万订单处理。
+      - 设计幂等键和补偿任务机制，将重复结算事故从月均 6 起降为 0 起。
+      - 建设服务指标、链路追踪和告警面板，将核心故障平均定位时间从 35 分钟降至 12 分钟。
+  - company: 华东示例网络有限公司
+    role: Java 后端开发工程师
+    location: 上海
+    start: "2019.06"
+    end: "2021.06"
+    type: fulltime
+    tech:
+      - Java
+      - Spring Boot
+      - MySQL
+      - Redis
+    highlights:
+      - 负责会员权益系统接口开发和数据迁移，支持 300 万会员权益查询。
+      - 通过 SQL 索引优化和热点缓存，将权益查询接口平均响应时间降低 45%。
+projects:
+  - name: 内部研发效能平台
+    role: 技术负责人
+    start: "2023.02"
+    end: "2023.11"
+    tech:
+      - Go
+      - React
+      - PostgreSQL
+      - Kubernetes
+    description: 聚合发布、配置、告警和服务资产信息的内部平台。
+    highlights:
+      - 统一 40+ 服务的配置发布入口，减少研发跨系统操作步骤。
+      - 设计 RBAC 权限和审计日志模型，满足关键配置变更追溯要求。
+education:
+  - school: 华南示例大学
+    degree: 本科
+    major: 软件工程
+    location: 广州
+    start: "2015.09"
+    end: "2019.06"
+skills:
+  - category: 编程语言
+    items:
+      - Go
+      - Java
+      - Python
+      - SQL
+  - category: 后端与中间件
+    items:
+      - MySQL
+      - Redis
+      - Kafka
+      - Spring Boot
+  - category: 工程与平台
+    items:
+      - Kubernetes
+      - Prometheus
+      - Grafana
+      - CI/CD
+achievements:
+  - 公司年度优秀工程师

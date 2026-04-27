@@ -1,0 +1,40 @@
+\documentclass[10pt,a4paper]{ctexart}
+\usepackage[margin=1.35cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=1.3em, itemsep=1pt, topsep=2pt, parsep=0pt}
+\hypersetup{colorlinks=true, urlcolor=black, linkcolor=black}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}[\titlerule]
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+
+\newcommand{\resumeSubheading}[4]{
+  \textbf{#1} \hfill #2\\
+  \textit{#3} \hfill \textit{#4}
+}
+
+\newcommand{\resumeProjectHeading}[3]{
+  \textbf{#1} \hfill #2\\
+  \textit{#3}\\[-1pt]
+}
+
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{ {{NAME}} }}\\
+\vspace{3pt}
+{\small {{TITLE_LINE}} }\\
+\vspace{3pt}
+{\small {{CONTACT_LINE}} }
+\end{center}
+
+{{SECTIONS}}
+
+\end{document}

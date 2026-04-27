@@ -1,0 +1,90 @@
+profile_version: 1
+language: zh-CN
+target:
+  role: AI 应用开发工程师
+  city: 上海
+  seniority: intern
+  direction:
+    - LLM 应用
+    - RAG
+layout:
+  emphasis: projects
+  max_pages: 1
+basics:
+  name: 周一诺
+  title: AI 应用开发实习生
+  phone: "13800000002"
+  email: zhouyinuo@example.com
+  location: 上海
+  github: https://github.com/yinuo-ai
+summary:
+  - 重点实践 LLM 应用、RAG 检索增强和智能体工作流，具备从原型到部署的完整项目经验。
+  - 熟悉 Python、LangChain、向量数据库和基础后端接口开发。
+education:
+  - school: 上海示例大学
+    degree: 硕士
+    major: 软件工程
+    location: 上海
+    start: "2023.09"
+    end: "2026.06"
+experience:
+  - company: 智能应用实验室
+    role: 研发实习生
+    location: 上海
+    start: "2024.07"
+    end: "2024.10"
+    type: internship
+    tech:
+      - Python
+      - LangChain
+      - Milvus
+    highlights:
+      - 参与企业知识库问答原型开发，负责文档切分、向量检索和答案引用链路。
+      - 调整 chunk 策略和重排序规则，使测试集 Top-3 命中率从 71% 提升至 84%。
+projects:
+  - name: 面向招聘场景的 RAG 简历问答系统
+    role: 项目负责人
+    start: "2024.04"
+    end: "2024.08"
+    tech:
+      - Python
+      - FastAPI
+      - LangChain
+      - Milvus
+      - OpenAI API
+    description: 支持对候选人简历进行结构化检索、问答和岗位匹配解释。
+    highlights:
+      - 设计简历解析、向量索引和问答引用模块，支持 500+ 份简历的批量入库。
+      - 增加字段级检索过滤和 rerank 策略，将岗位技能问题回答准确率提升 18 个百分点。
+      - 输出答案引用片段，降低 HR 审阅时的信息核验成本。
+  - name: Agent 工作流任务分解器
+    role: 核心开发
+    start: "2024.01"
+    end: "2024.03"
+    tech:
+      - Python
+      - Pydantic
+      - Redis
+    description: 将用户需求拆解为可执行任务并跟踪状态。
+    highlights:
+      - 设计任务 schema 和状态机，支持任务创建、依赖关系和失败重试记录。
+      - 使用 Redis 缓存中间状态，减少重复规划调用。
+skills:
+  - category: AI 应用
+    items:
+      - RAG
+      - Prompt Engineering
+      - LangChain
+      - 向量检索
+  - category: 后端开发
+    items:
+      - Python
+      - FastAPI
+      - RESTful API
+  - category: 数据与工具
+    items:
+      - Milvus
+      - Redis
+      - Git
+achievements:
+  - 研究生创新项目立项负责人
