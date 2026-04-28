@@ -1,0 +1,74 @@
+\documentclass[10pt,a4paper]{ctexart}
+\usepackage[margin=1.28cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{graphicx}
+
+% Chinese-first clean resume style, inspired by resume-chinese layout goals.
+% The template keeps this project ownership and does not copy external template code.
+\definecolor{accent}{HTML}{2F5597}
+\definecolor{textgray}{HTML}{444444}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=1.25em, itemsep=1pt, topsep=2pt, parsep=0pt}
+\hypersetup{colorlinks=true, urlcolor=accent, linkcolor=accent}
+\titleformat{\section}{\large\bfseries\color{accent}}{}{0pt}{}[\vspace{-2pt}\titlerule]
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+
+\newcommand{\resumeSubheading}[4]{
+  \textbf{#1} \hfill {\small\color{textgray} #2}\\[-1pt]
+  {\small #3} \hfill {\small\color{textgray} #4}
+}
+
+\newcommand{\resumeProjectHeading}[3]{
+  \textbf{#1} \hfill {\small\color{textgray} #2}\\[-1pt]
+  {\small #3}\\[-1pt]
+}
+
+\newif\ifhasphoto
+{{PHOTO_FLAG}}
+\newcommand{\resumePhotoPath}{ {{PHOTO_PATH}} }
+\newcommand{\resumePhotoBox}{
+  \IfFileExists{\resumePhotoPath}
+    {\includegraphics[width=2.2cm,height=2.8cm,keepaspectratio]{\resumePhotoPath}}
+    {\fbox{\parbox[c][2.8cm][c]{2.2cm}{\centering\small 照片}}}
+}
+
+\begin{document}
+
+\ifhasphoto
+\begin{tabularx}{\textwidth}{@{}X p{2.4cm}@{}}
+\begin{minipage}[c]{0.76\textwidth}
+\raggedright
+{\LARGE \bfseries {{NAME}}}\\
+\vspace{3pt}
+{\small\color{textgray} {{TITLE_LINE}}}\\
+\vspace{2pt}
+{\small {{CONTACT_LINE}}}
+\end{minipage}
+&
+\begin{minipage}[c]{2.4cm}
+\raggedleft\resumePhotoBox
+\end{minipage}
+\end{tabularx}
+\vspace{-2pt}
+\else
+\begin{center}
+{\LARGE \bfseries {{NAME}}}\\
+\vspace{2pt}
+{\small\color{textgray} {{TITLE_LINE}}}\\
+\vspace{2pt}
+{\small {{CONTACT_LINE}}}
+\end{center}
+\vspace{-2pt}
+\fi
+
+{{SECTIONS}}
+
+\end{document}

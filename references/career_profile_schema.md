@@ -24,6 +24,7 @@ basics:
   email: zhangsan@example.com
   location: 上海
   github: https://github.com/example
+  photo: assets/photo.jpg
 summary:
   - 具备 Python 后端、数据库和云原生项目经验。
 education:
@@ -93,9 +94,11 @@ metadata:
 
 - `basics.title`: Short professional title shown under the name.
 - `basics.phone`, `basics.email`, `basics.location`.
+- `basics.photo`: Optional local photo path for Chinese resume scenarios that require an ID-style photo. Omit it for ATS-friendly technical resumes.
 - `summary`: 2-4 concise positioning bullets.
 - `experience[].highlights` and `projects[].highlights`: concrete contributions and outcomes.
 - `tech`: technologies used in each role/project.
+- `target.seniority`: common values are `new_grad`, `intern`, `experienced`, `career_change`, `project_based`, or `senior`.
 - `layout.emphasis`: `auto`, `projects`, `experience`, `education`, or `balanced`.
 
 ## Section Emphasis Rules
@@ -117,3 +120,12 @@ The renderer may change section order and bullet budgets, but it should not hide
 - Separate individual contribution from team/project result.
 - Mark uncertain content with `TODO:` instead of filling it creatively.
 - Avoid unverifiable claims such as "精通" unless the user provides strong evidence.
+
+## Renderer Gap Report
+
+`scripts/render_resume.py` reports profile gaps without blocking `.tex` generation:
+
+- `[PROFILE ERROR]`: missing `profile_version: 1`, `basics.name`, `target.role`, a reliable contact method, at least one substantive `education` / `experience` / `projects` section, or at least one usable skills category.
+- `[PROFILE WARN]`: empty sections, unresolved `TODO:` values, missing dates on education/experience/project entries, non-categorized skills, or fewer than two usable bullets on a major experience/project.
+
+Use these messages as the next follow-up checklist during resume interviews.

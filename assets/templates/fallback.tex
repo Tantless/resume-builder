@@ -6,6 +6,7 @@
 \usepackage{titlesec}
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{graphicx}
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
@@ -25,8 +26,33 @@
   \textit{#3}\\[-1pt]
 }
 
+\newif\ifhasphoto
+{{PHOTO_FLAG}}
+\newcommand{\resumePhotoPath}{ {{PHOTO_PATH}} }
+\newcommand{\resumePhotoBox}{
+  \IfFileExists{\resumePhotoPath}
+    {\includegraphics[width=2.2cm,height=2.8cm,keepaspectratio]{\resumePhotoPath}}
+    {\fbox{\parbox[c][2.8cm][c]{2.2cm}{\centering\small 照片}}}
+}
+
 \begin{document}
 
+\ifhasphoto
+\begin{tabularx}{\textwidth}{@{}X p{2.4cm}@{}}
+\begin{minipage}[c]{0.76\textwidth}
+\raggedright
+{\LARGE \textbf{ {{NAME}} }}\\
+\vspace{4pt}
+{\small {{TITLE_LINE}} }\\
+\vspace{3pt}
+{\small {{CONTACT_LINE}} }
+\end{minipage}
+&
+\begin{minipage}[c]{2.4cm}
+\raggedleft\resumePhotoBox
+\end{minipage}
+\end{tabularx}
+\else
 \begin{center}
 {\LARGE \textbf{ {{NAME}} }}\\
 \vspace{3pt}
@@ -34,6 +60,7 @@
 \vspace{3pt}
 {\small {{CONTACT_LINE}} }
 \end{center}
+\fi
 
 {{SECTIONS}}
 

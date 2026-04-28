@@ -1,82 +1,65 @@
 # Resume Builder Skill
 
-这是一个项目内追踪的单一 agent skill，用于帮助 Codex、Claude Code 等编码代理基于用户画像生成中文技术简历。
+## 是什么
 
-当前 MVP 聚焦一件事：通过用户自述和自适应追问整理 Career Profile，并把 YAML 画像稳定渲染为 LaTeX 简历，可选编译为 PDF。
+`resume-builder` 是一个给 AI 编码代理使用的中文技术简历 skill。它会根据你的自由描述、已有简历、项目经历或求职目标，追问缺失信息，并帮你整理成可生成简历的内容。
 
-## 功能范围
+适合人群：
 
-- 先让用户自由描述求职背景，而不是填写长表单。
-- 从自述中提取结构化 `Career Profile` YAML。
-- 针对缺失、模糊、缺少量化结果的内容继续追问。
-- 根据用户画像调整简历中项目、实习/工作、教育、技能的比重。
-- 使用现代中文技术简历模板生成 `.tex`。
-- 在本机有 XeLaTeX 时可生成 `.pdf`。
-- 提供多个示例画像用于验证不同候选人类型。
+- 应届生、实习生、转岗候选人。
+- 后端、前端、AI 应用、全栈、数据等技术岗位候选人。
+- 想让 Codex、Claude Code、OpenClaw 等代理协助整理中文技术简历的人。
 
-暂不包含：
+## 放到哪里
 
-- 实时岗位 JD 拉取
-- 成功率评估
-- 能力差距分析
-- 自动投递
-- 多模板家族
-- 完整 CLI 套件
+把整个 `resume-builder` 文件夹放进你使用的 agent 的 skills 目录。不要只复制 `SKILL.md`，模板和配套文件也要一起保留。
 
-## 目录结构
+常见目录：
+
+- Codex：`~/.codex/skills/resume-builder/`，或项目内 `.agents/skills/resume-builder/`
+- Claude Code：`~/.claude/skills/resume-builder/`，或项目内 `.claude/skills/resume-builder/`
+- OpenClaw：`<workspace>/skills/resume-builder/`、`<workspace>/.agents/skills/resume-builder/`、`~/.agents/skills/resume-builder/`、`~/.openclaw/skills/resume-builder/`
+
+## 怎么调用
+
+Codex：
 
 ```text
-.agents/skills/resume-builder/
-├── SKILL.md
-├── assets/
-│   └── templates/
-│       └── modern_chinese_technical.tex
-├── examples/
-│   ├── experienced_engineer.yaml
-│   ├── new_graduate.yaml
-│   └── project_heavy_intern.yaml
-├── references/
-│   ├── career_profile_schema.md
-│   └── interview_flow.md
-└── scripts/
-    ├── render_resume.py
-    └── requirements.txt
+$resume-builder 帮我生成一版中文技术简历，模板用 dev。下面是我的背景：...
 ```
 
-## 使用方式
+Claude Code：
 
-在 agent 中触发或指定使用 `resume-builder` skill，让用户先自由描述背景。skill 会根据 `references/interview_flow.md` 的流程提取画像、追问缺失信息，并按 `references/career_profile_schema.md` 生成 YAML。
-
-也可以直接用示例画像测试渲染：
-
-```bash
-python -m pip install -r .agents/skills/resume-builder/scripts/requirements.txt
-python .agents/skills/resume-builder/scripts/render_resume.py .agents/skills/resume-builder/examples/new_graduate.yaml --out-dir out
+```text
+/resume-builder 帮我生成一版中文技术简历，模板用 dev。下面是我的背景：...
 ```
 
-生成 PDF：
+OpenClaw：
 
-```bash
-python .agents/skills/resume-builder/scripts/render_resume.py .agents/skills/resume-builder/examples/new_graduate.yaml --out-dir out --pdf
+```text
+/skill resume-builder 帮我生成一版中文技术简历，模板用 dev。下面是我的背景：...
 ```
 
-PDF 编译默认使用 `xelatex`。如果本机没有 LaTeX 工具链，脚本会保留 `.tex` 并输出明确提示。
+也可以不用命令，直接说：
 
-## 示例画像
+```text
+请使用 resume-builder skill，根据下面经历整理中文技术简历。目标岗位是后端工程师，模板用 fallback。...
+```
 
-- `new_graduate.yaml`：应届生，项目和教育背景权重更高。
-- `project_heavy_intern.yaml`：AI 应用实习/项目型候选人，项目经历权重更高。
-- `experienced_engineer.yaml`：有经验后端工程师，工作经历权重更高。
+## 调用时说什么
 
-## 渲染逻辑
+你可以直接贴自然语言，不需要先整理成表格。建议包含：
 
-`render_resume.py` 会根据 profile 中的 `layout.emphasis` 和候选人经历自动决定 section 顺序：
+- 目标岗位和投递场景。
+- 教育背景、工作/实习经历、项目经历。
+- 技术栈、成果数据、获奖或证书。
+- 是否需要照片版。
+- 求职类型，例如应届生、找实习、社招跳槽、转岗、项目型、高年限。
+- 想用哪个模板。
 
-- `experience`：突出工作/实习经历。
-- `projects`：突出项目经历。
-- `education`：突出教育背景。
-- `balanced`：平衡展示。
-- `auto`：根据 `target.seniority`、工作经历和项目数量推断。
+## 可选模板
 
-渲染器负责 LaTeX 转义、section 排序、bullet 数量控制和 PDF 编译检查。agent 负责访谈、事实核对、内容补全和简历质量把关。
-# resume-builder
+- `dev`：默认模板，简洁清爽，适合主要精进和日常使用。
+- `fallback`：保守模板，朴素稳定，适合需要更低风险版式时使用。
+
+不指定模板时默认使用 `dev`。

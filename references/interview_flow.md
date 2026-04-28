@@ -1,13 +1,37 @@
 # Interview Flow
 
-Use a draft-first interview. The goal is to minimize form-filling while still producing enough structure for a strong resume.
+Use a compact-defaults, draft-first interview. The goal is to minimize form-filling while still producing enough structure for a strong resume.
+
+## First-Run Mode Selection
+
+Before asking for a full background paragraph, run:
+
+```bash
+python .agents/skills/resume-builder/scripts/resume_options.py --json
+```
+
+Use the returned options to present one compact selector covering:
+
+- Photo mode: default to no-photo unless the user needs a Chinese photo resume.
+- Template: default to `dev` unless the user asks for a conservative fallback.
+- Candidate preset: default to auto when the user is unsure.
+
+Do not show a selector if the user's first message already gives clear choices for photo mode, template, and candidate type.
+
+If the user says "默认", "随便", or "不确定", continue with:
+
+- `photo_mode: no_photo`
+- `template: dev`
+- `candidate_preset: auto`
+
+When a non-auto candidate preset is selected, apply its `profile_defaults` while drafting the Career Profile. For `with_photo`, ask for the local image path before final rendering.
 
 ## Opening Prompt
 
-Ask the user:
+After mode selection, ask the user:
 
 ```text
-请先用一段话自由介绍你的求职背景。能想到什么就写什么：目标岗位/城市/薪资期望、学校和专业、实习或工作经历、项目经历、技术栈、奖项证书、Github/作品链接、你想突出的优势，以及你不想放进简历的内容。先不用整理格式，我会帮你提取成简历画像并继续追问缺失信息。
+请先用一段话自由介绍你的求职背景。能想到什么就写什么：目标岗位/城市/薪资期望、学校和专业、实习或工作经历、项目经历、技术栈、奖项证书、Github/作品链接、你想突出的优势，以及你不想放进简历的内容。先不用整理格式，我会按刚才的默认模式提取成简历画像，并继续追问缺失信息。
 ```
 
 ## Extraction Pass
