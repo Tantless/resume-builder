@@ -137,7 +137,7 @@ class RenderResumeTests(unittest.TestCase):
     def test_validate_profile_reports_required_empty_todo_and_thin_bullets(self) -> None:
         profile = {
             "profile_version": 1,
-            "target": {"role": "TODO: 目标岗位"},
+            "target": {"role": "待补充：目标岗位"},
             "basics": {"name": "", "email": "TODO: 邮箱"},
             "education": [],
             "projects": [
@@ -154,16 +154,16 @@ class RenderResumeTests(unittest.TestCase):
         issues = render_resume.validate_profile(profile)
         issue_map = {(issue.severity, issue.path, issue.message) for issue in issues}
 
-        self.assertIn(("error", "basics.name", "candidate name is required"), issue_map)
-        self.assertIn(("error", "target.role", "target role is required"), issue_map)
-        self.assertIn(("error", "basics", "provide at least one reliable contact method"), issue_map)
-        self.assertIn(("error", "skills", "provide at least one skills category with usable items"), issue_map)
-        self.assertIn(("warn", "education", "section is present but has no usable content"), issue_map)
-        self.assertIn(("warn", "target.role", "contains unresolved TODO content"), issue_map)
-        self.assertIn(("warn", "basics.email", "contains unresolved TODO content"), issue_map)
-        self.assertIn(("warn", "projects[0]", "dates are missing or unresolved"), issue_map)
+        self.assertIn(("error", "basics.name", "候选人姓名不能为空"), issue_map)
+        self.assertIn(("error", "target.role", "目标岗位不能为空"), issue_map)
+        self.assertIn(("error", "basics", "至少提供一种可靠联系方式"), issue_map)
+        self.assertIn(("error", "skills", "至少提供一个包含可用条目的技能类别"), issue_map)
+        self.assertIn(("warn", "education", "版块已存在但没有可用内容"), issue_map)
+        self.assertIn(("warn", "target.role", "存在未解决的待补充内容"), issue_map)
+        self.assertIn(("warn", "basics.email", "存在未解决的待补充内容"), issue_map)
+        self.assertIn(("warn", "projects[0]", "日期缺失或尚未确认"), issue_map)
         self.assertIn(
-            ("warn", "projects[0].highlights", "expected at least 2 usable bullets for a major item"),
+            ("warn", "projects[0].highlights", "主要条目建议至少提供 2 条可用要点"),
             issue_map,
         )
 
@@ -176,7 +176,7 @@ class RenderResumeTests(unittest.TestCase):
                 """
 profile_version: 1
 target:
-  role: "TODO: 目标岗位"
+  role: "待补充：目标岗位"
 basics:
   name: ""
 projects:
@@ -197,9 +197,9 @@ skills: []
             )
 
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn("[OK] Wrote LaTeX:", result.stdout)
-            self.assertIn("[PROFILE ERROR] basics.name: candidate name is required", result.stderr)
-            self.assertIn("[PROFILE WARN] target.role: contains unresolved TODO content", result.stderr)
+            self.assertIn("[OK] 已写入 LaTeX：", result.stdout)
+            self.assertIn("[PROFILE ERROR] basics.name: 候选人姓名不能为空", result.stderr)
+            self.assertIn("[PROFILE WARN] target.role: 存在未解决的待补充内容", result.stderr)
             self.assertTrue((out_dir / "incomplete.tex").exists())
 
 

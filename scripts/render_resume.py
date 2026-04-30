@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render a Career Profile YAML file into a Chinese technical resume."""
+"""将简历画像 YAML 渲染为中文技术简历。"""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ LATEX_REPLACEMENTS = {
     "^": r"\textasciicircum{}",
 }
 
-TODO_PATTERN = re.compile(r"\bTODO\b\s*:?", re.IGNORECASE)
+TODO_PATTERN = re.compile(r"(?:\bTODO\b\s*:?|待补充\s*[：:]?|待确认\s*[：:]?)", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -50,6 +50,16 @@ class EnvironmentIssue:
     component: str
     message: str
     install_hint: str = ""
+
+
+def display_path(path: Path) -> str:
+    resolved = path.resolve(strict=False)
+    for base in (SKILL_ROOT.resolve(), Path.cwd().resolve()):
+        try:
+            return resolved.relative_to(base).as_posix()
+        except ValueError:
+            continue
+    return resolved.as_posix()
 
 
 def check_environment(template_path: Path, latex_engine: str = "xelatex", check_pdf: bool = True) -> list[EnvironmentIssue]:
@@ -69,38 +79,38 @@ def check_environment(template_path: Path, latex_engine: str = "xelatex", check_
         add(
             "error",
             "python",
-            f"Python 3.10+ is required; current version is {sys.version.split()[0]}",
-            "Install Python 3.10 or newer, then rerun the command.",
+            f"需要 Python 3.10+；当前版本是 {sys.version.split()[0]}",
+            "请安装 Python 3.10 或更新版本后重试。",
         )
     else:
-        add("ok", "python", f"Python {sys.version.split()[0]} is available")
+        add("ok", "python", f"Python {sys.version.split()[0]} 可用")
 
     if yaml is None:
         add(
             "error",
             "PyYAML",
-            "PyYAML is required to read Career Profile YAML files",
-            "Ask before installing, then run: python -m pip install -r .agents/skills/resume-builder/scripts/requirements.txt",
+            "读取简历画像 YAML 需要 PyYAML",
+            "征得用户同意后，在 skill 根目录执行：python -m pip install -r scripts/requirements.txt",
         )
     else:
         version = getattr(yaml, "__version__", "available")
-        add("ok", "PyYAML", f"PyYAML {version} is available")
+        add("ok", "PyYAML", f"PyYAML {version} 可用")
 
     if template_path.exists():
-        add("ok", "template", f"Template found: {template_path}")
+        add("ok", "template", f"已找到模板：{display_path(template_path)}")
     else:
-        add("error", "template", f"Template not found: {template_path}")
+        add("error", "template", f"未找到模板：{display_path(template_path)}")
 
     if check_pdf:
         executable = shutil.which(latex_engine)
         if executable:
-            add("ok", latex_engine, f"LaTeX engine found: {executable}")
+            add("ok", latex_engine, "已找到 LaTeX 引擎")
         else:
             add(
                 "warn",
                 latex_engine,
-                f"LaTeX engine not found on PATH: {latex_engine}. PDF compilation will be unavailable.",
-                "XeLaTeX is installed through a TeX distribution such as MiKTeX or TeX Live, not through pip.",
+                f"PATH 中未找到 LaTeX 引擎：{latex_engine}。将无法编译 PDF。",
+                "XeLaTeX 来自 MiKTeX、TeX Live 等 TeX 发行版，不是通过 pip 安装。",
             )
 
     return issues
@@ -125,15 +135,15 @@ def has_environment_errors(issues: list[EnvironmentIssue]) -> bool:
 def load_profile(path: Path) -> dict[str, Any]:
     if yaml is None:
         raise SystemExit(
-            "PyYAML is required to read Career Profile YAML files.\n"
-            "Install it with: python -m pip install PyYAML"
+            "读取简历画像 YAML 需要 PyYAML。\n"
+            "征得用户同意后，在 skill 根目录执行：python -m pip install -r scripts/requirements.txt"
         )
 
     with path.open("r", encoding="utf-8") as handle:
         data = yaml.safe_load(handle)
 
     if not isinstance(data, dict):
-        raise SystemExit(f"Profile must be a YAML mapping: {path}")
+        raise SystemExit(f"画像文件必须是 YAML 映射：{path}")
 
     return data
 
@@ -232,27 +242,27 @@ def validate_profile(profile: dict[str, Any]) -> list[ProfileIssue]:
         issues.append(ProfileIssue(severity=severity, path=path, message=message))
 
     if profile.get("profile_version") != 1:
-        add("error", "profile_version", "expected profile_version: 1")
+        add("error", "profile_version", "应设置为 profile_version: 1")
 
     basics = profile.get("basics")
     if not isinstance(basics, dict):
-        add("error", "basics", "expected a mapping with name and contact fields")
+        add("error", "basics", "应提供包含姓名和联系方式的映射")
         basics = {}
 
     target = profile.get("target")
     if not isinstance(target, dict):
-        add("error", "target", "expected a mapping with the target role")
+        add("error", "target", "应提供包含目标岗位的映射")
         target = {}
 
     if is_missing(basics.get("name")):
-        add("error", "basics.name", "candidate name is required")
+        add("error", "basics.name", "候选人姓名不能为空")
     if is_missing(target.get("role")):
-        add("error", "target.role", "target role is required")
+        add("error", "target.role", "目标岗位不能为空")
     if not any(has_meaningful_content(value) for value in contact_values(profile)):
-        add("error", "basics", "provide at least one reliable contact method")
+        add("error", "basics", "至少提供一种可靠联系方式")
 
     if not any(has_meaningful_content(profile.get(key)) for key in ("education", "experience", "projects")):
-        add("error", "education|experience|projects", "provide at least one substantive section")
+        add("error", "education|experience|projects", "至少提供一个有实质内容的教育、经历或项目版块")
 
     skills = as_list(profile.get("skills"))
     usable_skill_groups = 0
@@ -260,24 +270,24 @@ def validate_profile(profile: dict[str, Any]) -> list[ProfileIssue]:
         path = child_path("skills", index)
         if not isinstance(group, dict):
             if has_meaningful_content(group):
-                add("warn", path, "skill entries should be grouped by category")
+                add("warn", path, "技能条目应按类别分组")
                 usable_skill_groups += 1
             continue
         if is_missing(group.get("category")):
-            add("warn", child_path(path, "category"), "skill category is missing")
+            add("warn", child_path(path, "category"), "技能类别缺失")
         if is_missing(group.get("items")):
-            add("warn", child_path(path, "items"), "skill category has no usable items")
+            add("warn", child_path(path, "items"), "技能类别没有可用条目")
         elif has_meaningful_content(group.get("category")):
             usable_skill_groups += 1
     if usable_skill_groups == 0:
-        add("error", "skills", "provide at least one skills category with usable items")
+        add("error", "skills", "至少提供一个包含可用条目的技能类别")
 
     for section in ("summary", "education", "experience", "projects", "skills", "achievements", "certifications"):
         if section in profile and not has_usable_content(profile.get(section)):
-            add("warn", section, "section is present but has no usable content")
+            add("warn", section, "版块已存在但没有可用内容")
 
     for path in todo_paths(profile):
-        add("warn", path, "contains unresolved TODO content")
+        add("warn", path, "存在未解决的待补充内容")
 
     for section in ("education", "experience", "projects"):
         for index, item in enumerate(as_list(profile.get(section))):
@@ -285,7 +295,7 @@ def validate_profile(profile: dict[str, Any]) -> list[ProfileIssue]:
                 continue
             path = child_path(section, index)
             if not has_meaningful_content(item.get("start")) and not has_meaningful_content(item.get("end")):
-                add("warn", path, "dates are missing or unresolved")
+                add("warn", path, "日期缺失或尚未确认")
 
     for section in ("experience", "projects"):
         for index, item in enumerate(as_list(profile.get(section))):
@@ -294,7 +304,7 @@ def validate_profile(profile: dict[str, Any]) -> list[ProfileIssue]:
             path = child_path(section, index)
             count = usable_highlight_count(item)
             if count < 2:
-                add("warn", child_path(path, "highlights"), "expected at least 2 usable bullets for a major item")
+                add("warn", child_path(path, "highlights"), "主要条目建议至少提供 2 条可用要点")
 
     return issues
 
@@ -513,7 +523,7 @@ def photo_path(profile: dict[str, Any], profile_dir: Path | None = None) -> str:
 
 def render_tex(profile: dict[str, Any], template_path: Path, profile_dir: Path | None = None) -> tuple[str, str]:
     basics = profile.get("basics") if isinstance(profile.get("basics"), dict) else {}
-    name = basics.get("name") or "TODO: 姓名"
+    name = basics.get("name") or "待补充：姓名"
     emphasis = infer_emphasis(profile)
     resolved_photo_path = photo_path(profile, profile_dir)
     template = template_path.read_text(encoding="utf-8")
@@ -538,7 +548,7 @@ def safe_output_stem(profile_path: Path) -> str:
 def compile_pdf(tex_path: Path, engine: str) -> Path | None:
     executable = shutil.which(engine)
     if executable is None:
-        print(f"[WARN] LaTeX engine not found: {engine}. Generated .tex only.", file=sys.stderr)
+        print(f"[WARN] 未找到 LaTeX 引擎：{engine}。已仅生成 .tex。", file=sys.stderr)
         return None
 
     command = [executable, "--disable-installer", "-interaction=nonstopmode", "-halt-on-error", tex_path.name]
@@ -553,7 +563,7 @@ def compile_pdf(tex_path: Path, engine: str) -> Path | None:
     if result.returncode != 0:
         log_path = tex_path.with_suffix(".latex.log")
         log_path.write_text(result.stdout, encoding="utf-8")
-        print(f"[WARN] PDF compilation failed. LaTeX log: {log_path}", file=sys.stderr)
+        print(f"[WARN] PDF 编译失败。LaTeX 日志：{display_path(log_path)}", file=sys.stderr)
         return None
 
     pdf_path = tex_path.with_suffix(".pdf")
@@ -561,13 +571,13 @@ def compile_pdf(tex_path: Path, engine: str) -> Path | None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Render a Career Profile YAML resume.")
-    parser.add_argument("profile", type=Path, nargs="?", help="Path to Career Profile YAML.")
-    parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE, help="LaTeX template path.")
-    parser.add_argument("--out-dir", type=Path, default=None, help="Output directory. Defaults to profile directory.")
-    parser.add_argument("--pdf", action="store_true", help="Attempt PDF compilation after writing .tex.")
-    parser.add_argument("--latex-engine", default="xelatex", help="LaTeX engine for PDF compilation.")
-    parser.add_argument("--check-env", action="store_true", help="Check local rendering dependencies and exit.")
+    parser = argparse.ArgumentParser(description="渲染简历画像 YAML。")
+    parser.add_argument("profile", type=Path, nargs="?", help="简历画像 YAML 路径。")
+    parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE, help="LaTeX 模板路径。")
+    parser.add_argument("--out-dir", type=Path, default=None, help="输出目录，默认与画像文件同目录。")
+    parser.add_argument("--pdf", action="store_true", help="写入 .tex 后尝试编译 PDF。")
+    parser.add_argument("--latex-engine", default="xelatex", help="用于 PDF 编译的 LaTeX 引擎。")
+    parser.add_argument("--check-env", action="store_true", help="检查本地渲染依赖后退出。")
     return parser.parse_args()
 
 
@@ -581,7 +591,7 @@ def main() -> int:
         return 1 if has_environment_errors(issues) else 0
 
     if args.profile is None:
-        raise SystemExit("Profile path is required unless --check-env is used.")
+        raise SystemExit("除非使用 --check-env，否则必须提供画像文件路径。")
 
     env_issues = check_environment(template_path, args.latex_engine, check_pdf=args.pdf)
     blocking_env_issues = [issue for issue in env_issues if issue.severity == "error"]
@@ -593,9 +603,9 @@ def main() -> int:
     out_dir = (args.out_dir or profile_path.parent).resolve()
 
     if not profile_path.exists():
-        raise SystemExit(f"Profile not found: {profile_path}")
+        raise SystemExit(f"未找到画像文件：{display_path(profile_path)}")
     if not template_path.exists():
-        raise SystemExit(f"Template not found: {template_path}")
+        raise SystemExit(f"未找到模板：{display_path(template_path)}")
 
     out_dir.mkdir(parents=True, exist_ok=True)
     profile = load_profile(profile_path)
@@ -605,8 +615,8 @@ def main() -> int:
 
     tex_path = out_dir / f"{safe_output_stem(profile_path)}.tex"
     tex_path.write_text(tex, encoding="utf-8", newline="\n")
-    print(f"[OK] Wrote LaTeX: {tex_path}")
-    print(f"[OK] Section emphasis: {emphasis}")
+    print(f"[OK] 已写入 LaTeX：{display_path(tex_path)}")
+    print(f"[OK] 版块侧重：{emphasis}")
 
     if args.pdf:
         pdf_warnings = [
@@ -619,7 +629,7 @@ def main() -> int:
         else:
             pdf_path = compile_pdf(tex_path, args.latex_engine)
             if pdf_path:
-                print(f"[OK] Wrote PDF: {pdf_path}")
+                print(f"[OK] 已写入 PDF：{display_path(pdf_path)}")
 
     return 0
 

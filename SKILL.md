@@ -1,58 +1,79 @@
 ---
 name: resume-builder
-description: "Create adaptive Chinese technical resumes from a user's free-form background, career profile YAML, or existing resume notes. Use when Codex or Claude Code should interview the user, extract a structured Career Profile, improve resume bullets, and render LaTeX/PDF resumes with the bundled template and renderer."
+description: "为 Codex、Claude Code、OpenClaw 等 agent CLI 创建中文技术简历。用户提供自由背景、已有简历、项目经历或求职目标时使用：先做模式选择，再访谈补全信息，抽取中文简历画像 YAML，优化经历表述，并用随包模板渲染 LaTeX/PDF。"
 ---
 
-# Resume Builder
+# 中文技术简历构建器
 
-Build a modern Chinese technical resume from a user's background. Start by choosing compact defaults, then prefer a draft-first flow: ask the user to self-describe freely, extract a structured Career Profile, and ask only the follow-up questions needed to make the resume complete and persuasive.
+根据用户背景生成中文技术简历。优先采用“默认配置 + 先出草稿 + 自适应追问”的流程：让用户自由描述经历，抽取结构化简历画像，只追问影响简历完整度和说服力的缺口。
 
-## Workflow
+## 语言规则
 
-1. Offer first-run mode selection before the detailed resume interview.
-   - If the user already provided explicit photo mode, template, and candidate type, acknowledge those choices and continue without repeating the selector.
-   - Otherwise run `python .agents/skills/resume-builder/scripts/resume_options.py --json` to get the current photo modes, templates, candidate presets, and defaults.
-   - Present a compact selector in one message: photo mode, template, and candidate type. The user should be able to answer all three at once.
-   - Make clear that "默认", "随便", or "不确定" is acceptable. Use `no_photo`, `dev`, and `auto` unless the user's background clearly implies a better candidate preset.
-   - Map the selected candidate preset into the draft profile using the tool's `profile_defaults`, especially `target.seniority` and `layout.emphasis`.
-   - For `with_photo`, ask for a local image path before final rendering. Do not invent a `basics.photo` value.
+- 交互语言跟随用户输入语言；如果用户没有明确语言偏好，默认使用中文。
+- 本 skill 的目标产物是中文技术简历。简历画像 YAML、简历正文、待补充标记、渲染输出中的自然语言默认使用中文。
+- 保留必要的技术标识、字段名、模板名和枚举值，例如 `profile_version`、`target.seniority`、`dev`、`new_grad`、`Python`。
+- 不确定信息使用中文标记 `待补充：...`。
 
-2. Check the local environment before rendering.
-   - Run `python .agents/skills/resume-builder/scripts/render_resume.py --check-env` before the first render in a session.
-   - If the user wants PDF output, confirm whether `xelatex` is available from the environment check.
-   - If `PyYAML` is missing, ask the user before installing it into the active Python environment.
-   - If `xelatex` is missing, explain that it comes from a TeX distribution such as MiKTeX or TeX Live, not from `pip install xelatex`; ask before helping install system-level tooling.
-   - If the user does not want to install LaTeX tooling, render `.tex` only.
+## 路径规则
 
-3. Ask for a free-form self-introduction.
-   - Ask the user to include any known basics, target role, city, education, internships, work, projects, skills, awards, links, and constraints.
-   - Do not start with a long fixed questionnaire.
+- 本文件所在目录就是 skill 根目录。所有资源路径说明都以 skill 根目录为基准。
+- 不要在命令中写死用户主目录、项目根目录或某个 agent CLI 的安装目录。
+- 执行随包脚本前，先进入 skill 根目录，再使用相对路径：
 
-4. Extract a draft Career Profile.
-   - Read `references/career_profile_schema.md` before creating or editing profile YAML.
-   - Save the profile as YAML when the user asks for a file or when rendering is needed.
-   - Preserve uncertain fields with `TODO:` text rather than inventing facts.
+```bash
+python scripts/resume_options.py --json
+python scripts/render_resume.py --check-env
+```
 
-5. Run adaptive follow-up.
-   - Read `references/interview_flow.md` for question priorities.
-   - Ask targeted questions for missing basics, unclear timelines, vague project contribution, missing metrics, skill depth, and target-role relevance.
-   - Ask one focused question at a time unless the user explicitly wants a batch questionnaire.
+- 用户画像和输出目录也使用相对路径示例，例如 `profiles/zhangsan.yaml`、`output/zhangsan/`。
 
-6. Polish resume content.
-   - Convert experience into action-result bullets.
-   - Prefer quantified outcomes when evidence exists.
-   - Keep claims defensible; do not exaggerate skill depth or responsibilities.
-   - For Chinese resumes, keep bullets concise and information-dense.
+## 工作流
 
-7. Render the resume.
-   - Use `scripts/render_resume.py` to convert profile YAML into LaTeX.
-   - Use the bundled default template at `assets/templates/dev.tex` unless the user provides another template.
-   - Review any `[PROFILE ERROR]` or `[PROFILE WARN]` output and report remaining content gaps to the user.
-   - Generate PDF only when requested or useful; the script reports clearly if LaTeX tooling is missing.
+1. 先做首次模式选择。
+   - 如果用户已经明确照片模式、模板和候选人类型，确认这些选择后继续，不重复展示选择器。
+   - 否则在 skill 根目录运行 `python scripts/resume_options.py --json`，读取当前照片模式、模板、候选人预设和默认值。
+   - 用一条消息给出紧凑选择器：照片模式、模板、候选人类型。让用户可以一次性回答三项。
+   - 明确说明“默认”“随便”“不确定”都可以。除非用户背景明显更适合其他预设，否则使用 `no_photo`、`dev`、`auto`。
+   - 把候选人预设的 `profile_defaults` 应用到草稿画像，尤其是 `target.seniority` 和 `layout.emphasis`。
+   - 如果选择 `with_photo`，最终渲染前向用户索要本地照片相对路径；不要编造 `basics.photo`。
 
-## First-Run Selector Shape
+2. 渲染前检查本地环境。
+   - 每个会话第一次渲染前，在 skill 根目录运行 `python scripts/render_resume.py --check-env`。
+   - 如果用户需要 PDF，确认环境检查中是否存在 `xelatex`。
+   - 如果缺少 `PyYAML`，先征得用户同意，再在当前 Python 环境安装。
+   - 如果缺少 `xelatex`，说明它来自 MiKTeX、TeX Live 等 TeX 发行版，不是通过 `pip install xelatex` 安装；协助安装系统级工具前先询问用户。
+   - 如果用户不想安装 LaTeX 工具，只生成 `.tex`。
 
-After reading `resume_options.py --json`, present choices in this compact shape:
+3. 让用户自由介绍背景。
+   - 请用户尽量包含：基本信息、目标岗位、城市、教育、实习、工作、项目、技术栈、奖项、链接和约束。
+   - 不要一开始就发长问卷。
+
+4. 抽取简历画像。
+   - 创建或编辑画像 YAML 前，先读 `references/career_profile_schema.md`。
+   - 用户要求保存文件或需要渲染时，把画像保存为 YAML。
+   - 不编造事实；未知或不确定字段写 `待补充：...`。
+   - 画像中的自然语言内容默认中文，包括摘要、经历要点、备注和待补充说明。
+
+5. 自适应追问。
+   - 追问前读 `references/interview_flow.md`。
+   - 优先追问缺失基本信息、时间线、项目贡献、量化指标、技术深度和目标岗位匹配度。
+   - 默认一次只问一个聚焦问题；用户明确想要批量问卷时再合并问题。
+
+6. 打磨简历内容。
+   - 把经历整理为“动作 + 方法/技术 + 难点/规模 + 结果”的要点。
+   - 有证据时优先量化成果。
+   - 保持主张可证实，不夸大技能深度或职责边界。
+   - 中文简历要点保持精炼、信息密度高。
+
+7. 渲染简历。
+   - 在 skill 根目录使用 `scripts/render_resume.py` 把画像 YAML 转为 LaTeX。
+   - 默认模板是 `assets/templates/dev.tex`，除非用户选择其他模板。
+   - 检查 `[PROFILE ERROR]` 和 `[PROFILE WARN]` 输出，并把剩余内容缺口告诉用户。
+   - 仅在用户要求或确实有用时生成 PDF；缺少 LaTeX 工具时脚本会保留 `.tex`。
+
+## 首次选择器形状
+
+读取 `resume_options.py --json` 后，按这个紧凑形状展示选项：
 
 ```text
 我先帮你设定简历默认模式，直接回复编号或关键词即可，也可以说“默认”。
@@ -64,57 +85,61 @@ After reading `resume_options.py --json`, present choices in this compact shape:
 默认：无照片 + dev + 自动判断。选完后请直接贴你的背景，我会继续整理简历。
 ```
 
-Use the actual template and preset names returned by the options tool if they differ from this example.
+如果选项工具返回的模板名或预设名不同，使用工具返回的真实名称。
 
-## Environment Check
+## 环境检查
 
-```bash
-python .agents/skills/resume-builder/scripts/render_resume.py --check-env
-```
-
-The command reports:
-
-- `[ENV OK]` for available runtime pieces.
-- `[ENV ERROR]` for required `.tex` rendering dependencies that must be fixed before rendering.
-- `[ENV WARN]` for optional PDF tooling gaps such as missing `xelatex`.
-
-## Render Command
+在 skill 根目录执行：
 
 ```bash
-python .agents/skills/resume-builder/scripts/render_resume.py path/to/profile.yaml --out-dir path/to/output
+python scripts/render_resume.py --check-env
 ```
 
-Generate PDF with XeLaTeX if available:
+命令会报告：
+
+- `[ENV OK]`：运行时组件可用。
+- `[ENV ERROR]`：生成 `.tex` 必需的依赖缺失，需要修复后再渲染。
+- `[ENV WARN]`：可选 PDF 工具缺失，例如没有 `xelatex`。
+
+## 渲染命令
+
+在 skill 根目录执行，所有路径都写相对路径：
 
 ```bash
-python .agents/skills/resume-builder/scripts/render_resume.py path/to/profile.yaml --out-dir path/to/output --pdf
+python scripts/render_resume.py profiles/zhangsan.yaml --out-dir output/zhangsan
 ```
 
-If `PyYAML` is missing, install it in the active Python environment:
+如果环境中有 XeLaTeX，可以生成 PDF：
 
 ```bash
-python -m pip install -r .agents/skills/resume-builder/scripts/requirements.txt
+python scripts/render_resume.py profiles/zhangsan.yaml --out-dir output/zhangsan --pdf
 ```
 
-Do not use `pip install xelatex`. Install MiKTeX, TeX Live, or another TeX distribution if PDF compilation is required.
+如果缺少 `PyYAML`，征得用户同意后，在 skill 根目录执行：
 
-## Output Expectations
+```bash
+python -m pip install -r scripts/requirements.txt
+```
 
-For each resume build, provide:
+不要使用 `pip install xelatex`。需要 PDF 编译时，安装 MiKTeX、TeX Live 或其他 TeX 发行版。
 
-- The profile YAML path used.
-- The generated `.tex` path.
-- The generated `.pdf` path when compilation succeeds.
-- Any missing profile fields or content risks still worth improving.
-- Any renderer-reported profile errors or warnings that need user follow-up.
-- Any environment warnings and whether the user chose `.tex` only or PDF setup.
+## 输出汇报
 
-## Resource Map
+每次构建简历后，向用户汇报：
 
-- `references/career_profile_schema.md`: canonical YAML schema and completeness rules.
-- `references/interview_flow.md`: self-description prompt, follow-up priorities, and bullet-improvement rules.
-- `scripts/resume_options.py`: deterministic first-run options provider for templates, photo modes, candidate presets, and defaults.
-- `scripts/render_resume.py`: deterministic YAML-to-LaTeX renderer with optional PDF compilation.
-- `assets/templates/dev.tex`: actively refined clean Chinese technical resume template.
-- `assets/templates/fallback.tex`: conservative fallback template.
-- `examples/*.yaml`: sample profiles for student, project-heavy intern, and experienced engineer cases.
+- 使用的画像 YAML 相对路径。
+- 生成的 `.tex` 相对路径。
+- PDF 编译成功时，生成的 `.pdf` 相对路径。
+- 仍值得补充的画像字段或内容风险。
+- 渲染器报告的画像错误或警告，以及后续追问建议。
+- 环境警告，以及当前选择是只生成 `.tex` 还是继续配置 PDF。
+
+## 资源地图
+
+- `references/career_profile_schema.md`：简历画像 YAML 的权威结构、完整性规则和中文内容要求。
+- `references/interview_flow.md`：自由描述提示、追问优先级和经历要点打磨规则。
+- `scripts/resume_options.py`：首次模式选择的确定性选项来源。
+- `scripts/render_resume.py`：确定性的 YAML 到 LaTeX 渲染器，支持可选 PDF 编译。
+- `assets/templates/dev.tex`：默认中文技术简历模板。
+- `assets/templates/fallback.tex`：更保守的中文技术简历模板。
+- `examples/*.yaml`：不同候选人类型的中文画像示例。

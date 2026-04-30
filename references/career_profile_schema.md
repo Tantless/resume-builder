@@ -1,8 +1,14 @@
-# Career Profile Schema
+# 简历画像结构
 
-Use YAML as the source of truth. Keep the profile factual, editable, and reusable. Do not invent facts; use `TODO:` markers for unknown values.
+画像 YAML 是简历数据的唯一事实来源。它要事实清晰、可编辑、可复用。不要编造信息；缺失或不确定的内容使用 `待补充：...` 标记。
 
-## Top-Level Shape
+## 语言约定
+
+- 本 skill 面向中文技术简历，画像中的自然语言内容默认中文。
+- 如果用户用英文或其他语言触发 skill，agent 的交互语言跟随用户；但画像 YAML、简历正文和待补充说明仍默认中文，除非用户明确要求生成非中文简历。
+- YAML 字段名、枚举值、技术名词、链接和邮箱保持原样，例如 `profile_version`、`new_grad`、`Python`、`https://...`。
+
+## 顶层结构
 
 ```yaml
 profile_version: 1
@@ -63,7 +69,7 @@ projects:
     link: https://github.com/example/resume
     description: 面向求职者的结构化简历生成工具。
     highlights:
-      - 设计画像 YAML schema，支持 20+ 字段的简历数据复用。
+      - 设计画像 YAML 结构，支持 20+ 字段的简历数据复用。
 skills:
   - category: 编程语言
     items:
@@ -79,53 +85,53 @@ certifications:
   - CET-6
 metadata:
   notes:
-    - TODO: 补充期望城市和薪资。
+    - 待补充：期望城市和薪资。
 ```
 
-## Required Fields
+## 必填字段
 
-- `profile_version`: Use `1`.
-- `basics.name`: Candidate name.
-- `target.role`: Target role or role family.
-- At least one of `education`, `experience`, or `projects`.
-- At least one `skills` category.
+- `profile_version`：固定为 `1`。
+- `basics.name`：候选人姓名。
+- `target.role`：目标岗位或岗位族。
+- `education`、`experience`、`projects` 至少有一个包含实质内容。
+- `skills` 至少有一个可用技能分类。
 
-## Recommended Fields
+## 推荐字段
 
-- `basics.title`: Short professional title shown under the name.
-- `basics.phone`, `basics.email`, `basics.location`.
-- `basics.photo`: Optional local photo path for Chinese resume scenarios that require an ID-style photo. Omit it for ATS-friendly technical resumes.
-- `summary`: 2-4 concise positioning bullets.
-- `experience[].highlights` and `projects[].highlights`: concrete contributions and outcomes.
-- `tech`: technologies used in each role/project.
-- `target.seniority`: common values are `new_grad`, `intern`, `experienced`, `career_change`, `project_based`, or `senior`.
-- `layout.emphasis`: `auto`, `projects`, `experience`, `education`, or `balanced`.
+- `basics.title`：展示在姓名下方的职业标题。
+- `basics.phone`、`basics.email`、`basics.location`：联系方式和所在地。
+- `basics.photo`：可选本地照片相对路径，适合明确要求证件照的中文简历场景；技术岗或 ATS 投递场景默认省略。相对路径以画像 YAML 所在目录为基准，例如 `assets/photo.jpg`。
+- `summary`：2-4 条简洁定位。
+- `experience[].highlights` 和 `projects[].highlights`：具体贡献和结果。
+- `tech`：每段经历或项目使用的技术。
+- `target.seniority`：常用值为 `new_grad`、`intern`、`experienced`、`career_change`、`project_based`、`senior`。
+- `layout.emphasis`：可选 `auto`、`projects`、`experience`、`education`、`balanced`。
 
-## Section Emphasis Rules
+## 版块侧重规则
 
-Use `layout.emphasis` when the user has a clear preference. Otherwise let the renderer infer:
+用户有明确偏好时使用 `layout.emphasis`。没有偏好时由渲染器推断：
 
-- `experience`: at least two full-time roles, or seniority is `experienced`.
-- `projects`: project count is greater than work experience count, or seniority is `new_grad` / `intern`.
-- `education`: education is strong and practical experience is thin.
-- `balanced`: mixed profile without a dominant strength.
+- `experience`：至少两段全职经历，或 `target.seniority` 为 `experienced` / `senior`。
+- `projects`：项目数量多于工作经历，或 `target.seniority` 为 `new_grad` / `intern` / `career_change` / `project_based`。
+- `education`：教育背景较强，实践经历较少。
+- `balanced`：经历较均衡，没有明显单一优势。
 
-The renderer may change section order and bullet budgets, but it should not hide factual content unless the profile explicitly marks it optional.
+渲染器可以调整版块顺序和要点数量预算，但不应隐藏事实内容，除非画像明确把该内容标为可选。
 
-## Quality Rules
+## 质量规则
 
-- Prefer action + method + result bullets.
-- Quantify results when available: latency, cost, conversion, users, revenue, reliability, accuracy, ranking, scale.
-- Keep each bullet to one clear claim.
-- Separate individual contribution from team/project result.
-- Mark uncertain content with `TODO:` instead of filling it creatively.
-- Avoid unverifiable claims such as "精通" unless the user provides strong evidence.
+- 优先写成“动作 + 方法/技术 + 难点/规模 + 结果”的要点。
+- 有证据时量化结果：延迟、成本、转化、用户量、收入、稳定性、准确率、排名、规模等。
+- 每条要点只表达一个清晰主张。
+- 区分个人贡献和团队/项目结果。
+- 不确定内容写 `待补充：...`，不要创造性补全。
+- 避免无证据的“精通”等表述，除非用户提供了足够强的证明。
 
-## Renderer Gap Report
+## 渲染器缺口报告
 
-`scripts/render_resume.py` reports profile gaps without blocking `.tex` generation:
+`scripts/render_resume.py` 会报告画像缺口，但不会因为可修复的内容问题阻止 `.tex` 生成：
 
-- `[PROFILE ERROR]`: missing `profile_version: 1`, `basics.name`, `target.role`, a reliable contact method, at least one substantive `education` / `experience` / `projects` section, or at least one usable skills category.
-- `[PROFILE WARN]`: empty sections, unresolved `TODO:` values, missing dates on education/experience/project entries, non-categorized skills, or fewer than two usable bullets on a major experience/project.
+- `[PROFILE ERROR]`：缺少 `profile_version: 1`、`basics.name`、`target.role`、可靠联系方式、至少一个实质性的 `education` / `experience` / `projects` 版块，或至少一个可用技能分类。
+- `[PROFILE WARN]`：空版块、未解决的 `待补充：...`、教育/经历/项目缺少日期、技能没有分类，或主要经历/项目少于两条可用要点。
 
-Use these messages as the next follow-up checklist during resume interviews.
+访谈时把这些消息作为下一轮追问清单。

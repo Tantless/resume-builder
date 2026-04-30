@@ -1,95 +1,103 @@
-# Interview Flow
+# 访谈流程
 
-Use a compact-defaults, draft-first interview. The goal is to minimize form-filling while still producing enough structure for a strong resume.
+采用“紧凑默认值 + 先出草稿”的访谈方式。目标是减少填表负担，同时收集足够结构化的信息，产出可信、有说服力的中文技术简历。
 
-## First-Run Mode Selection
+## 语言规则
 
-Before asking for a full background paragraph, run:
+- agent 回复语言跟随用户输入语言；用户没有明显语言偏好时默认中文。
+- 简历画像 YAML、简历正文、待补充说明和渲染文件中的自然语言默认中文。
+- 字段名、模板名、预设 ID、技术名词和链接保持原样。
+
+## 首次模式选择
+
+在询问完整背景段落前，先进入 skill 根目录并运行：
 
 ```bash
-python .agents/skills/resume-builder/scripts/resume_options.py --json
+python scripts/resume_options.py --json
 ```
 
-Use the returned options to present one compact selector covering:
+使用返回结果展示一个紧凑选择器，覆盖：
 
-- Photo mode: default to no-photo unless the user needs a Chinese photo resume.
-- Template: default to `dev` unless the user asks for a conservative fallback.
-- Candidate preset: default to auto when the user is unsure.
+- 照片模式：默认无照片，除非用户明确需要中文证件照简历。
+- 模板：默认 `dev`，用户想要保守版式时使用 `fallback`。
+- 候选人预设：用户不确定时默认 `auto`。
 
-Do not show a selector if the user's first message already gives clear choices for photo mode, template, and candidate type.
+如果用户第一句话已经明确照片模式、模板和候选人类型，不要重复展示选择器。
 
-If the user says "默认", "随便", or "不确定", continue with:
+如果用户说“默认”“随便”或“不确定”，继续使用：
 
 - `photo_mode: no_photo`
 - `template: dev`
 - `candidate_preset: auto`
 
-When a non-auto candidate preset is selected, apply its `profile_defaults` while drafting the Career Profile. For `with_photo`, ask for the local image path before final rendering.
+当用户选择非 `auto` 候选人预设时，把对应 `profile_defaults` 应用到画像草稿。选择 `with_photo` 时，在最终渲染前询问本地照片相对路径。
 
-## Opening Prompt
+## 开场提示
 
-After mode selection, ask the user:
+模式选择后，向用户提问：
 
 ```text
-请先用一段话自由介绍你的求职背景。能想到什么就写什么：目标岗位/城市/薪资期望、学校和专业、实习或工作经历、项目经历、技术栈、奖项证书、Github/作品链接、你想突出的优势，以及你不想放进简历的内容。先不用整理格式，我会按刚才的默认模式提取成简历画像，并继续追问缺失信息。
+请先用一段话自由介绍你的求职背景。能想到什么就写什么：目标岗位/城市/薪资期望、学校和专业、实习或工作经历、项目经历、技术栈、奖项证书、Github/作品链接、你想突出的优势，以及你不想放进简历的内容。先不用整理格式，我会按刚才的默认模式提取成中文简历画像，并继续追问缺失信息。
 ```
 
-## Extraction Pass
+如果用户使用非中文提问，可以用用户的语言解释流程，但仍说明默认产物是中文简历画像和中文简历。
 
-After the self-description:
+## 抽取阶段
 
-1. Extract a draft Career Profile using `career_profile_schema.md`.
-2. Keep facts in the user's wording when precision matters.
-3. Normalize dates only when obvious.
-4. Use `TODO:` for missing or uncertain fields.
-5. Summarize what was extracted before asking follow-up.
+用户完成自由描述后：
 
-## Follow-Up Priorities
+1. 按 `career_profile_schema.md` 抽取画像草稿。
+2. 精度重要时保留用户原始事实，不随意改写日期、学校、公司、岗位和指标。
+3. 只有明显无歧义时才规范化日期。
+4. 缺失或不确定字段写 `待补充：...`。
+5. 向用户总结已经抽取的内容，再提出下一步追问。
 
-Ask one focused question at a time. Prioritize:
+## 追问优先级
 
-1. Contact and target basics needed to render the header.
-2. Timeline gaps: school dates, role dates, project dates.
-3. Role contribution: "你具体负责哪部分？"
-4. Quantified impact: "有没有延迟、准确率、用户量、成本、排名、收入、效率等指标？"
-5. Technical depth: "这个技术你是调用、配置、二次开发，还是自己实现核心逻辑？"
-6. Resume positioning: "这段经历更想突出工程能力、业务结果、算法能力，还是协作推进？"
-7. Sensitive or optional content: salary, age, photo, political status, GPA, weak grades.
+默认一次只问一个聚焦问题。按以下顺序优先：
 
-## Bullet Improvement Pattern
+1. 渲染页眉所需的联系方式和目标岗位。
+2. 时间线缺口：学校时间、岗位时间、项目时间。
+3. 角色贡献：“你具体负责哪部分？”
+4. 量化影响：“有没有延迟、准确率、用户量、成本、排名、收入、效率等指标？”
+5. 技术深度：“这个技术你是调用、配置、二次开发，还是自己实现核心逻辑？”
+6. 简历定位：“这段经历更想突出工程能力、业务结果、算法能力，还是协作推进？”
+7. 敏感或可选内容：薪资、年龄、照片、政治面貌、GPA、弱成绩。
 
-Transform rough notes into bullets using:
+## 要点打磨模式
+
+把粗略描述整理为：
 
 ```text
 动作 + 技术/方法 + 规模/难点 + 结果/影响
 ```
 
-Examples:
+示例：
 
-- Rough: 做了缓存优化。
-- Better: 基于 Redis 为商品详情接口增加多级缓存，将高峰期 P95 延迟从 380ms 降至 140ms。
+- 原始描述：做了缓存优化。
+- 改写后：基于 Redis 为商品详情接口增加多级缓存，将高峰期 P95 延迟从 380ms 降至 140ms。
 
-- Rough: 负责模型训练。
-- Better: 清洗 12 万条标注样本并调优 LightGBM 特征组合，使简历岗位匹配 AUC 从 0.78 提升至 0.86。
+- 原始描述：负责模型训练。
+- 改写后：清洗 12 万条标注样本并调优 LightGBM 特征组合，使简历岗位匹配 AUC 从 0.78 提升至 0.86。
 
-## Completeness Check
+## 完整性检查
 
-Before rendering, check:
+渲染前检查：
 
-- Header has name plus at least one reliable contact method.
-- Target role is known.
-- At least one substantive section exists: education, experience, or projects.
-- Skills are grouped by category.
-- Each major experience/project has at least two usable bullets or a clear TODO.
-- Dates are present or intentionally omitted.
-- Claims are not overstated relative to user evidence.
+- 页眉有姓名，并至少有一种可靠联系方式。
+- 目标岗位已知。
+- 至少有一个实质性版块：教育、工作/实习经历或项目经历。
+- 技能按类别分组。
+- 每个主要经历或项目至少有两条可用要点，或明确留下 `待补充：...`。
+- 日期存在，或已经确认可以故意省略。
+- 主张没有超出用户提供的证据。
 
-## When to Render
+## 何时渲染
 
-Render when:
+满足以下情况时可以渲染：
 
-- The user asks for a resume file.
-- The core profile is complete enough for a useful first draft.
-- The user wants to review layout before continuing content refinement.
+- 用户要求生成简历文件。
+- 核心画像已经足够形成有用的第一版草稿。
+- 用户希望先看版式，再继续打磨内容。
 
-After rendering, report remaining content gaps separately from renderer success.
+渲染后，把文件生成结果和剩余内容缺口分开汇报。

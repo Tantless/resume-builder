@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List first-run options for the resume-builder skill."""
+"""列出 resume-builder skill 的首次运行选项。"""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ PHOTO_MODES: list[dict[str, Any]] = [
         "label": "有照片",
         "description": "适合明确要求证件照的中文简历场景；渲染前需要用户提供本地图片路径。",
         "default": False,
-        "profile_defaults": {"basics": {"photo": "TODO: 本地照片路径"}},
+        "profile_defaults": {"basics": {"photo": "待补充：本地照片路径"}},
     },
 ]
 
@@ -170,25 +170,25 @@ def build_options() -> dict[str, Any]:
 
 
 def print_human(options: dict[str, Any]) -> None:
-    print("Photo modes:")
+    print("照片模式：")
     for item in options["photo_modes"]:
-        marker = " (default)" if item.get("default") else ""
+        marker = "（默认）" if item.get("default") else ""
         print(f"- {item['id']}: {item['label']}{marker}")
 
-    print("\nTemplates:")
+    print("\n模板：")
     for item in options["templates"]:
-        marker = " (default)" if item.get("default") else ""
+        marker = "（默认）" if item.get("default") else ""
         print(f"- {item['id']}: {item['description']}{marker}")
 
-    print("\nCandidate presets:")
+    print("\n候选人预设：")
     for item in options["candidate_presets"]:
-        marker = " (default)" if item.get("default") else ""
+        marker = "（默认）" if item.get("default") else ""
         print(f"- {item['id']}: {item['label']}{marker}")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="List resume-builder first-run options.")
-    parser.add_argument("--json", action="store_true", help="Print options as JSON.")
+    parser = argparse.ArgumentParser(description="列出 resume-builder 首次运行选项。")
+    parser.add_argument("--json", action="store_true", help="以 JSON 格式输出选项。")
     return parser.parse_args()
 
 
